@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open First 100 TS Links</title>
+    <title>Download TS Links as Text File</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
         input, button { width: 90%; padding: 10px; margin: 10px 0; }
@@ -13,9 +13,9 @@
 </head>
 <body>
 
-    <h2>Open First 100 TS Links</h2>
+    <h2>Download TS Links as Text File</h2>
     <input type="text" id="m3u8Url" placeholder="Enter M3U8 URL">
-    <button onclick="openTSLinks()">Open TS Links</button>
+    <button onclick="fetchTSLinks()">Download TS Links</button>
     <div id="statusBox"></div>
 
     <script>
@@ -25,7 +25,7 @@
             statusBox.scrollTop = statusBox.scrollHeight;
         }
 
-        async function openTSLinks() {
+        async function fetchTSLinks() {
             let url = document.getElementById("m3u8Url").value;
             if (!url) {
                 alert("Please enter a valid M3U8 URL");
@@ -54,14 +54,19 @@
                 // Extract first 100 .ts file links
                 let tsUrls = tsFiles.slice(0, 100).map(file => file.startsWith("http") ? file : baseUrl + file);
 
-                logStatus(`🔄 Opening ${tsUrls.length} TS links with 500ms delay...`);
+                logStatus(`📄 Writing ${tsUrls.length} TS links to file...`);
 
-                for (let i = 0; i < tsUrls.length; i++) {
-                    setTimeout(() => {
-                        window.open(tsUrls[i], "_blank");
-                        logStatus(`✅ Opened: Segment ${i + 1}`);
-                    }, i * 500); // 500ms delay for each link
-                }
+                // Create a text blob and generate a download link
+                const textContent = tsUrls.join("\n");
+                const blob = new Blob([textContent], { type: "text/plain" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = "ts_links.txt";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                logStatus("✅ TS links saved and downloaded as ts_links.txt");
 
             } catch (error) {
                 logStatus(`❌ Error: ${error.message}`);
