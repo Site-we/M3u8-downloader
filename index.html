@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download TS Links as Text File</title>
+    <title>Download M3U8 File</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
         input, button { width: 90%; padding: 10px; margin: 10px 0; }
@@ -13,9 +13,9 @@
 </head>
 <body>
 
-    <h2>Download TS Links as Text File</h2>
+    <h2>Download M3U8 File</h2>
     <input type="text" id="m3u8Url" placeholder="Enter M3U8 URL">
-    <button onclick="fetchTSLinks()">Download TS Links</button>
+    <button onclick="downloadM3U8()">Download M3U8</button>
     <div id="statusBox"></div>
 
     <script>
@@ -25,7 +25,7 @@
             statusBox.scrollTop = statusBox.scrollHeight;
         }
 
-        async function fetchTSLinks() {
+        async function downloadM3U8() {
             let url = document.getElementById("m3u8Url").value;
             if (!url) {
                 alert("Please enter a valid M3U8 URL");
@@ -41,32 +41,18 @@
                 if (!response.ok) throw new Error(`M3U8 Fetch Failed: HTTP ${response.status} - ${response.statusText}`);
 
                 const m3u8Content = await response.text();
-                logStatus("✅ M3U8 file fetched! Extracting TS URLs...");
+                logStatus("✅ M3U8 file fetched! Preparing download...");
 
-                const baseUrl = url.substring(0, url.lastIndexOf("/") + 1);
-                const tsFiles = m3u8Content.split("\n").filter(line => line.trim() && !line.startsWith("#"));
-
-                if (tsFiles.length === 0) {
-                    logStatus("❌ No TS files found in M3U8.");
-                    return;
-                }
-
-                // Extract first 100 .ts file links
-                let tsUrls = tsFiles.slice(0, 100).map(file => file.startsWith("http") ? file : baseUrl + file);
-
-                logStatus(`📄 Writing ${tsUrls.length} TS links to file...`);
-
-                // Create a text blob and generate a download link
-                const textContent = tsUrls.join("\n");
-                const blob = new Blob([textContent], { type: "text/plain" });
+                // Create a blob and trigger download
+                const blob = new Blob([m3u8Content], { type: "application/vnd.apple.mpegurl" });
                 const a = document.createElement("a");
                 a.href = URL.createObjectURL(blob);
-                a.download = "ts_links.txt";
+                a.download = "playlist.m3u8";
                 document.body.appendChild(a);
                 a.click();
                 document.body.removeChild(a);
 
-                logStatus("✅ TS links saved and downloaded as ts_links.txt");
+                logStatus("✅ M3U8 file downloaded as playlist.m3u8");
 
             } catch (error) {
                 logStatus(`❌ Error: ${error.message}`);
