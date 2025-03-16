@@ -34,19 +34,16 @@
 
             logStatus("Fetching M3U8 file...");
 
-            const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
-            
             try {
-                const response = await fetch(proxyUrl);
+                const response = await fetch(url);
                 if (!response.ok) throw new Error(`M3U8 Fetch Failed: HTTP ${response.status} - ${response.statusText}`);
 
                 const m3u8Content = await response.text();
                 logStatus("✅ M3U8 file fetched! Preparing download...");
 
-                // Create a blob and trigger download
-                const blob = new Blob([m3u8Content], { type: "application/vnd.apple.mpegurl" });
+                // Create a hidden <a> element and trigger download without Blob URL
                 const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob);
+                a.href = "data:application/vnd.apple.mpegurl;charset=utf-8," + encodeURIComponent(m3u8Content);
                 a.download = "playlist.m3u8";
                 document.body.appendChild(a);
                 a.click();
