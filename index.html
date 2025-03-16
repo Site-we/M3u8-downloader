@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download First 100 TS Segments</title>
+    <title>Open First 100 TS Links</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
         input, button { width: 90%; padding: 10px; margin: 10px 0; }
@@ -13,9 +13,9 @@
 </head>
 <body>
 
-    <h2>Download First 100 TS Segments</h2>
+    <h2>Open First 100 TS Links</h2>
     <input type="text" id="m3u8Url" placeholder="Enter M3U8 URL">
-    <button onclick="downloadTS()">Download TS Files</button>
+    <button onclick="openTSLinks()">Open TS Links</button>
     <div id="statusBox"></div>
 
     <script>
@@ -25,7 +25,7 @@
             statusBox.scrollTop = statusBox.scrollHeight;
         }
 
-        async function downloadTS() {
+        async function openTSLinks() {
             let url = document.getElementById("m3u8Url").value;
             if (!url) {
                 alert("Please enter a valid M3U8 URL");
@@ -54,38 +54,17 @@
                 // Extract first 100 .ts file links
                 let tsUrls = tsFiles.slice(0, 100).map(file => file.startsWith("http") ? file : baseUrl + file);
 
-                logStatus(`🔄 Downloading ${tsUrls.length} TS files...`);
+                logStatus(`🔄 Opening ${tsUrls.length} TS links...`);
 
-                for (let i = 0; i < tsUrls.length; i++) {
-                    await fetchAndDownload(tsUrls[i], `${i + 1}.ts`);
-                }
-
-                logStatus("✅ All 100 TS segments downloaded!");
+                tsUrls.forEach((link, index) => {
+                    setTimeout(() => {
+                        window.open(link, "_blank");
+                        logStatus(`✅ Opened: Segment ${index + 1}`);
+                    }, index * 300); // 300ms delay to prevent pop-up blocking
+                });
 
             } catch (error) {
                 logStatus(`❌ Error: ${error.message}`);
-            }
-        }
-
-        async function fetchAndDownload(tsUrl, filename) {
-            try {
-                logStatus(`⏳ Fetching: ${tsUrl}`);
-
-                const response = await fetch(tsUrl);
-                if (!response.ok) throw new Error(`TS Fetch Failed: HTTP ${response.status} - ${response.statusText}`);
-
-                const blob = await response.blob();
-                const a = document.createElement("a");
-                a.href = URL.createObjectURL(blob);
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-
-                logStatus(`✅ Downloaded: ${filename}`);
-
-            } catch (error) {
-                logStatus(`❌ Failed: ${tsUrl} (${error.message})`);
             }
         }
     </script>
