@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Download First 100 TS Segments</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
+        input, button { width: 90%; padding: 10px; margin: 10px 0; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; }
+        #statusBox { width: 90%; height: 300px; background: #eee; padding: 10px; border-radius: 5px; text-align: left; overflow-y: auto; margin: 10px auto; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+    <h2>Download First 100 TS Segments</h2>
+    <input type="text" id="m3u8Url" placeholder="Enter M3U8 URL">
+    <button onclick="downloadTS()">Download TS Files</button>
+    <div id="statusBox"></div>
+
+    <script>
+        function logStatus(message) {
+            const statusBox = document.getElementById("statusBox");
+            statusBox.innerHTML += message + "<br>";
+            statusBox.scrollTop = statusBox.scrollHeight;
+        }
+
+        async function downloadTS() {
+            let url = document.getElementById("m3u8Url").value;
+            if (!url) {
+                alert("Please enter a valid M3U8 URL");
+                return;
+            }
+
+            logStatus("Fetching M3U8 file...");
+
+            const proxyUrl = "https://api.allorigins.win/raw?url=" + encodeURIComponent(url);
+            
+            try {
+                const response = await fetch(proxyUrl);
+                if (!response.ok) throw new Error(`M3U8 Fetch Failed: HTTP ${response.status} - ${response.statusText}`);
+
+                const m3u8Content = await response.text();
+                logStatus("✅ M3U8 file fetched! Extracting TS URLs...");
+
+                const baseUrl = url.substring(0, url.lastIndexOf("/") + 1);
+                const tsFiles = m3u8Content.split("\n").filter(line => line.trim() && !line.startsWith("#"));
+
+                if (tsFiles.length === 0) {
+                    logStatus("❌ No TS files found in M3U8.");
+                    return;
+                }
+
+                // Extract first 100 .ts file links
+                let tsUrls = tsFiles.slice(0, 100).map(file => file.startsWith("http") ? file : baseUrl + file);
+
+                logStatus(`🔄 Downloading ${tsUrls.length} TS files...`);
+
+                for (let i = 0; i < tsUrls.length; i++) {
+                    await fetchAndDownload(tsUrls[i], `${i + 1}.ts`);
+                }
+
+                logStatus("✅ All 100 TS segments downloaded!");
+
+            } catch (error) {
+                logStatus(`❌ Error: ${error.message}`);
+            }
+        }
+
+        async function fetchAndDownload(tsUrl, filename) {
+            try {
+                logStatus(`⏳ Fetching: ${tsUrl}`);
+
+                const response = await fetch(tsUrl);
+                if (!response.ok) throw new Error(`TS Fetch Failed: HTTP ${response.status} - ${response.statusText}`);
+
+                const blob = await response.blob();
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+
+                logStatus(`✅ Downloaded: ${filename}`);
+
+            } catch (error) {
+                logStatus(`❌ Failed: ${tsUrl} (${error.message})`);
+            }
+        }
+    </script>
+
+</body>
+</html>
