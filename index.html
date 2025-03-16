@@ -54,14 +54,14 @@
                 // Extract first 100 .ts file links
                 let tsUrls = tsFiles.slice(0, 100).map(file => file.startsWith("http") ? file : baseUrl + file);
 
-                logStatus(`🔄 Opening ${tsUrls.length} TS links...`);
+                logStatus(`🔄 Opening ${tsUrls.length} TS links with 500ms delay...`);
 
-                tsUrls.forEach((link, index) => {
+                for (let i = 0; i < tsUrls.length; i++) {
                     setTimeout(() => {
-                        window.open(link, "_blank");
-                        logStatus(`✅ Opened: Segment ${index + 1}`);
-                    }, index * 300); // 300ms delay to prevent pop-up blocking
-                });
+                        window.open(tsUrls[i], "_blank");
+                        logStatus(`✅ Opened: Segment ${i + 1}`);
+                    }, i * 500); // 500ms delay for each link
+                }
 
             } catch (error) {
                 logStatus(`❌ Error: ${error.message}`);
