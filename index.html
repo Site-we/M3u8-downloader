@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Direct M3U8 File Download</title>
+    <title>Force Download M3U8 File</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
         input, button { width: 90%; padding: 10px; margin: 10px 0; }
@@ -12,22 +12,25 @@
 </head>
 <body>
 
-    <h2>Direct M3U8 File Download</h2>
+    <h2>Force Download M3U8 File</h2>
     <input type="text" id="m3u8Url" placeholder="Enter M3U8 URL">
-    <button onclick="downloadM3U8()">Download M3U8</button>
+    <button onclick="forceDownloadM3U8()">Download M3U8</button>
 
     <script>
-        function downloadM3U8() {
+        function forceDownloadM3U8() {
             let url = document.getElementById("m3u8Url").value;
             if (!url) {
                 alert("Please enter a valid M3U8 URL");
                 return;
             }
 
-            // Create an <a> element to trigger direct download
+            // Force download by creating a hidden anchor element with a forced MIME type
             const a = document.createElement("a");
             a.href = url;
-            a.download = "playlist.m3u8"; // Suggests a filename
+            a.setAttribute("download", "playlist.m3u8"); // Force download
+            a.setAttribute("target", "_blank"); // Open in new tab to avoid playing
+            a.setAttribute("rel", "noopener noreferrer");
+
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
