@@ -3,57 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Download M3U8 File</title>
+    <title>Direct M3U8 File Download</title>
     <style>
         body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 20px; }
         input, button { width: 90%; padding: 10px; margin: 10px 0; }
         button { background: #007bff; color: white; border: none; cursor: pointer; }
-        #statusBox { width: 90%; height: 300px; background: #eee; padding: 10px; border-radius: 5px; text-align: left; overflow-y: auto; margin: 10px auto; white-space: pre-wrap; }
     </style>
 </head>
 <body>
 
-    <h2>Download M3U8 File</h2>
+    <h2>Direct M3U8 File Download</h2>
     <input type="text" id="m3u8Url" placeholder="Enter M3U8 URL">
     <button onclick="downloadM3U8()">Download M3U8</button>
-    <div id="statusBox"></div>
 
     <script>
-        function logStatus(message) {
-            const statusBox = document.getElementById("statusBox");
-            statusBox.innerHTML += message + "<br>";
-            statusBox.scrollTop = statusBox.scrollHeight;
-        }
-
-        async function downloadM3U8() {
+        function downloadM3U8() {
             let url = document.getElementById("m3u8Url").value;
             if (!url) {
                 alert("Please enter a valid M3U8 URL");
                 return;
             }
 
-            logStatus("Fetching M3U8 file...");
-
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error(`M3U8 Fetch Failed: HTTP ${response.status} - ${response.statusText}`);
-
-                const m3u8Content = await response.text();
-                logStatus("✅ M3U8 file fetched! Preparing download...");
-
-                // Create a hidden <a> element and trigger download without Blob URL
-                const a = document.createElement("a");
-                a.href = "data:application/vnd.apple.mpegurl;charset=utf-8," + encodeURIComponent(m3u8Content);
-                a.download = "playlist.m3u8";
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-
-                logStatus("✅ M3U8 file downloaded as playlist.m3u8");
-
-            } catch (error) {
-                logStatus(`❌ Error: ${error.message}`);
-            }
+            // Create an <a> element to trigger direct download
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "playlist.m3u8"; // Suggests a filename
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
     </script>
 
